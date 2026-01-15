@@ -17,37 +17,35 @@ const app = express();
  */
 app.set("trust proxy", true);
 
+// CORS Configuration
+const allowedOrigins = [
+    "http://localhost:3000", // Local development 
+    "https://shishu-doctor.vercel.app", // Deployed frontend
+    "https://shishudoctorbackend-trga.vercel.app", // Allow requests from backend itself
+
+];
+
+// Use CORS middleware with proper configuration
+app.use(cors({
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+
+        if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes("*")) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
+}));
+
+// Handle preflight requests
+// app.options('*', cors());
+
 // Middleware
-app.use((req: Request, res: Response, next: NextFunction) => {
-    const allowedOrigins: string[] = [
-        "*",
-        "http://localhost:3000", // Local development
-        "https://shishu-doctor.vercel.app", // Deployed frontend
-    ];
-    const origin = req.headers.origin;
-
-    if (origin && allowedOrigins.includes(origin)) {
-        res.setHeader("Access-Control-Allow-Origin", origin); // Dynamically set the origin
-        res.setHeader(
-            "Access-Control-Allow-Methods",
-            "GET, POST, PUT, DELETE, OPTIONS"
-        );
-        res.setHeader(
-            "Access-Control-Allow-Headers",
-            "Content-Type, Authorization"
-        );
-        res.setHeader("Access-Control-Allow-Credentials", "true");
-    } else {
-        res.setHeader("Access-Control-Allow-Origin", "null"); // Reject unauthorized origins
-    }
-
-    // Handle preflight OPTIONS requests
-    if (req.method === "OPTIONS") {
-        return res.status(200).end();
-    }
-
-    next();
-});
 app.use(express.json());
 
 // Routes
@@ -57,6 +55,17 @@ app.use("/api/visitors", visitorRoutes);
 // Health check
 app.get("/", (_req, res) => {
     res.send("API running successfully 🚀");
+});
+
+// Error handling middleware
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    console.error(err.stack);
+    res.status(500).json({ error: 'Something went wrong!' });
+});
+
+// 404 handler
+app.use((req: Request, res: Response) => {
+    res.status(404).json({ error: 'Route not found' });
 });
 
 export default app;
