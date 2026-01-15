@@ -72,6 +72,7 @@ const getVisitorCounts = async (req, res) => {
                 $count: "totalCountries"
             }
         ]);
+        console.log(countryCountAgg);
         const countryCount = countryCountAgg[0]?.totalCountries || 0;
         res.json({
             total,
