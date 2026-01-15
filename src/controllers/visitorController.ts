@@ -78,6 +78,8 @@ export const getVisitorCounts = async (req: Request, res: Response) => {
             }
         ]);
 
+
+        console.log(countryCountAgg);
         const countryCount = countryCountAgg[0]?.totalCountries || 0;
 
         res.json({

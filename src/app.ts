@@ -20,6 +20,7 @@ app.set("trust proxy", true);
 // Middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
     const allowedOrigins: string[] = [
+        "*",
         "http://localhost:3000", // Local development
         "https://shishu-doctor.vercel.app", // Deployed frontend
     ];
