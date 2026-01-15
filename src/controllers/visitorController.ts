@@ -66,9 +66,24 @@ export const getVisitorCounts = async (req: Request, res: Response) => {
             { $sort: { count: -1 } }
         ]);
 
+        // 🔹 ✅ UNIQUE COUNTRY COUNT (NEW)
+        const countryCountAgg = await Visitor.aggregate([
+            {
+                $group: {
+                    _id: "$country"
+                }
+            },
+            {
+                $count: "totalCountries"
+            }
+        ]);
+
+        const countryCount = countryCountAgg[0]?.totalCountries || 0;
+
         res.json({
             total,
             today: todayCount,
+            countryCount,   // ✅ added
             countryWise
         });
     } catch (err) {
